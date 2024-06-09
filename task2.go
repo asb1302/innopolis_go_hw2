@@ -32,20 +32,16 @@ func countVotes(votes []string) []Candidate {
 		counter[name] = 1
 	}
 
-	// Сортируем счетчик по убыванию
-	counterKeys := make([]string, 0, len(counter))
-	for key := range counter {
-		counterKeys = append(counterKeys, key)
-	}
-	sort.SliceStable(counterKeys, func(i, j int) bool {
-		return counter[counterKeys[i]] < counter[counterKeys[j]]
-	})
-
 	// делаем финальную мапу
 	var result []Candidate
 	for name, votesCounter := range counter {
 		result = append(result, Candidate{Name: name, Votes: votesCounter})
 	}
+
+	// Сортируем результат по убыванию голосов
+	sort.SliceStable(result, func(i, j int) bool {
+		return result[i].Votes > result[j].Votes
+	})
 
 	return result
 }

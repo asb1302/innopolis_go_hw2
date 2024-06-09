@@ -26,9 +26,14 @@ func buildRatingBySubjectsTableWithHOF() {
 	}
 
 	// Создание мапы для хранения результатов каждого предмета
-	subjectResults := make(map[string]map[int][]int)
+	subjectResults := make(map[int]map[int][]int)
 	for _, object := range data.Objects {
-		subjectResults[object.Name] = make(map[int][]int)
+		subjectResults[object.ID] = make(map[int][]int)
+	}
+
+	objectMap := make(map[int]Object)
+	for _, object := range data.Objects {
+		objectMap[object.ID] = object
 	}
 
 	// Заполнение мапы результатами
@@ -36,13 +41,14 @@ func buildRatingBySubjectsTableWithHOF() {
 		object := findObjectByIDWithHOF(result.ObjectID, data.Objects)
 		student := findStudentByIDWithHOF(result.StudentID, data.Students)
 
-		subjectResults[object.Name][student.Grade] = append(subjectResults[object.Name][student.Grade], result.Result)
+		subjectResults[object.ID][student.Grade] = append(subjectResults[object.ID][student.Grade], result.Result)
 	}
 
 	// Вывод таблиц для каждого предмета
-	for subject, grades := range subjectResults {
+	for objectID, grades := range subjectResults {
+		object := objectMap[objectID]
 		fmt.Println("________________")
-		fmt.Printf("%-9s | Mean\n", subject)
+		fmt.Printf("%-9s | Mean\n", object.Name)
 		fmt.Println("________________")
 
 		var totalResults []int
@@ -72,27 +78,37 @@ func buildRatingBySubjectsTableWithHOF() {
 }
 
 func findStudentByIDWithHOF(id int, students []Student) Student {
-	return Reduce(Filter(students, func(s Student) bool {
+	filteredStudents := Filter(students, func(s Student) bool {
 		return s.ID == id
-	}), Student{}, func(s Student, _ Student) Student {
-		return s
 	})
+
+	if len(filteredStudents) > 0 {
+		return filteredStudents[0]
+	}
+
+	return Student{}
 }
 
 func findObjectByIDWithHOF(id int, objects []Object) Object {
-	return Reduce(Filter(objects, func(o Object) bool {
+	filteredObjects := Filter(objects, func(o Object) bool {
 		return o.ID == id
-	}), Object{}, func(o Object, _ Object) Object {
-		return o
 	})
+	if len(filteredObjects) > 0 {
+		return filteredObjects[0]
+	}
+	return Object{}
 }
 
-func calculateMeanWithHOF(results []int) float64 {
-	sum := Reduce(results, 0, func(r int, acc int) int {
+func calculateMeanWithHOF(values []int) float64 {
+	if len(values) == 0 {
+		return 0
+	}
+
+	sum := Reduce(values, 0, func(r int, acc int) int {
 		return r + acc
 	})
 
-	return float64(sum) / float64(len(results))
+	return float64(sum) / float64(len(values))
 }
 
 func Filter[T any](s []T, f func(T) bool) []T {

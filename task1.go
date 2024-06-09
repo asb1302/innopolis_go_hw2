@@ -19,22 +19,23 @@ func intersectSlices(slices ...[]int) []int {
 	// Мапа для подсчета частоты появления каждого элемента
 	elementCount := make(map[int]int)
 
-	// Мапа для отслеживания элементов первого слайса
-	firstSliceSet := make(map[int]struct{})
 	for _, num := range slices[0] {
-		firstSliceSet[num] = struct{}{}
 		elementCount[num] = 1
 	}
 
 	// Обрабатываем остальные слайсы
 	for i := 1; i < len(slices); i++ {
+		if len(slices[i]) == 0 {
+			// Если слайс пустой, пересечение будет пустым
+			return []int{}
+		}
+
 		sliceSet := make(map[int]struct{})
 		for _, num := range slices[i] {
 			sliceSet[num] = struct{}{}
 		}
 
-		for num := range firstSliceSet {
-			// Если элемент актуального слайса есть в наборе, увеличиваем счетчик для этого элемента в исходном наборе из первого слайса
+		for num := range elementCount {
 			if _, found := sliceSet[num]; found {
 				elementCount[num]++
 			}

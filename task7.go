@@ -46,12 +46,20 @@ func buildRatingTableForExcellentStudents() {
 	fmt.Println("Student name  | Grade | Object    |   Result")
 	fmt.Println("_____________________________________")
 
+	// Создание мап для быстрого доступа к предметам по ID
+	objectMap := make(map[int]Object)
+
+	for _, object := range data.Objects {
+		objectMap[object.ID] = object
+	}
+
 	for _, student := range excellentStudents {
 		studentResults := Filter(data.Results, func(result Result) bool {
 			return result.StudentID == student.ID
 		})
 		for _, result := range studentResults {
-			object := findObjectByID(result.ObjectID, data.Objects)
+			object := objectMap[result.ObjectID]
+
 			fmt.Printf("%-14s | %-5d | %-9s | %-7d\n", student.Name, student.Grade, object.Name, result.Result)
 		}
 	}

@@ -58,34 +58,26 @@ func buildRatingTable() {
 		log.Fatal(err)
 	}
 
+	// Создание мап для быстрого доступа к студентам и предметам по ID
+	studentMap := make(map[int]Student)
+	objectMap := make(map[int]Object)
+
+	for _, student := range data.Students {
+		studentMap[student.ID] = student
+	}
+
+	for _, object := range data.Objects {
+		objectMap[object.ID] = object
+	}
+
 	fmt.Println("_____________________________________")
 	fmt.Printf("%-15s | %-6s | %-10s | %-7s\n", "Student name", "Grade", "Object", "Result")
 	fmt.Println("_____________________________________")
 	for _, result := range data.Results {
-		student := findStudentByID(result.StudentID, data.Students)
-		object := findObjectByID(result.ObjectID, data.Objects)
+		student := studentMap[result.StudentID]
+		object := objectMap[result.ObjectID]
 
 		fmt.Printf("%-15s | %-6d | %-10s | %-7d\n", student.Name, student.Grade, object.Name, result.Result)
 	}
 	fmt.Println("_____________________________________")
-}
-
-func findStudentByID(id int, students []Student) Student {
-	for _, student := range students {
-		if student.ID == id {
-			return student
-		}
-	}
-
-	return Student{}
-}
-
-func findObjectByID(id int, objects []Object) Object {
-	for _, object := range objects {
-		if object.ID == id {
-			return object
-		}
-	}
-
-	return Object{}
 }

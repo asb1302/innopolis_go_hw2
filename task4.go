@@ -38,23 +38,36 @@ func buildRatingBySubjectsTable() {
 	}
 
 	// Создание мапы для хранения результатов каждого предмета по каждому классу
-	subjectResults := make(map[string]map[int][]int)
+	subjectResults := make(map[int]map[int][]int)
 	for _, object := range data.Objects {
-		subjectResults[object.Name] = make(map[int][]int)
+		subjectResults[object.ID] = make(map[int][]int)
+	}
+
+	// Создание мап для быстрого доступа к студентам и предметам по ID
+	studentMap := make(map[int]Student)
+	objectMap := make(map[int]Object)
+
+	for _, student := range data.Students {
+		studentMap[student.ID] = student
+	}
+
+	for _, object := range data.Objects {
+		objectMap[object.ID] = object
 	}
 
 	// Заполнение мапы результатами для каждого класса
 	for _, result := range data.Results {
-		object := findObjectByID(result.ObjectID, data.Objects)
-		student := findStudentByID(result.StudentID, data.Students)
+		student := studentMap[result.StudentID]
+		object := objectMap[result.ObjectID]
 
-		subjectResults[object.Name][student.Grade] = append(subjectResults[object.Name][student.Grade], result.Result)
+		subjectResults[object.ID][student.Grade] = append(subjectResults[object.ID][student.Grade], result.Result)
 	}
 
 	// Вывод таблиц для каждого предмета
-	for subject, grades := range subjectResults {
+	for objectID, grades := range subjectResults {
+		object := objectMap[objectID]
 		fmt.Println("________________")
-		fmt.Printf("%-9s | Mean\n", subject)
+		fmt.Printf("%-9s | Mean\n", object.Name)
 		fmt.Println("________________")
 
 		var totalResults []int
@@ -79,11 +92,15 @@ func buildRatingBySubjectsTable() {
 	}
 }
 
-func calculateMean(results []int) float64 {
+func calculateMean(values []int) float64 {
+	if len(values) == 0 {
+		return 0
+	}
+
 	sum := 0
-	for _, result := range results {
+	for _, result := range values {
 		sum += result
 	}
 
-	return float64(sum) / float64(len(results))
+	return float64(sum) / float64(len(values))
 }
