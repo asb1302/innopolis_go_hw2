@@ -23,6 +23,11 @@ func intersectSlices(slices ...[]int) []int {
 		elementCount[num] = 1
 	}
 
+	// Проверка первого слайса на пустоту
+	if len(slices[0]) == 0 {
+		return []int{}
+	}
+
 	// Обрабатываем остальные слайсы
 	for i := 1; i < len(slices); i++ {
 		if len(slices[i]) == 0 {
